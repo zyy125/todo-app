@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办事项列表</title>
+    
+    <!-- 引入 CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>📝 我的待办事项</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div>总计</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="completedCount">0</div>
+                    <div>已完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="pendingCount">0</div>
+                    <div>未完成</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-section">
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="todoInput" 
+                    placeholder="输入新的待办事项..."
+                >
+                <button class="btn btn-primary" onclick="TodoApp.addTodo()">添加</button>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <button class="filter-btn active" onclick="TodoApp.filterTodos('all')">全部</button>
+            <button class="filter-btn" onclick="TodoApp.filterTodos('pending')">未完成</button>
+            <button class="filter-btn" onclick="TodoApp.filterTodos('completed')">已完成</button>
+        </div>
+
+        <!-- 待办事项列表 -->
+        <div class="todo-list" id="todoList">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <!-- 引入 JavaScript（注意顺序！） -->
+    <script src="/js/config.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

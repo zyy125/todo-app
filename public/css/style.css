@@ -104,20 +104,49 @@ body {
     gap: 10px;
 }
 
+/* 筛选按钮 */
 .filter-btn {
     flex: 1;
-    padding: 8px;
+    padding: 10px 8px;
     background: white;
     border: 2px solid #ddd;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    /* 添加过渡效果 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 悬停效果 */
+.filter-btn:hover {
+    transform: translateY(-2px) scale(1.05);  /* 向上移动并放大 */
+    border-color: #667eea;
+    color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);  /* 紫色阴影 */
+    background: linear-gradient(135deg, rgba(48, 10, 201, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+/* 激活状态 */
 .filter-btn.active {
-    background: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-color: #667eea;
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* 激活状态的悬停效果 */
+.filter-btn.active:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);  /* 反转渐变 */
+}
+
+/* 点击效果 */
+.filter-btn:active {
+    transform: translateY(0) scale(0.98);
 }
 
 /* 待办事项列表 */

@@ -23,4 +23,7 @@ type TodoListResponse struct {
 	Total     int    `json:"total"`
 	Completed int    `json:"completed"`
 	Pending   int    `json:"pending"`
+	Page int `json:"page"`
+	PageSize int `json:"pageSize"`
+	Totalpages int `json:"totalPages"`
 }

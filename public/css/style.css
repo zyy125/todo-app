@@ -236,3 +236,97 @@ body {
     border-radius: 8px;
     text-align: center;
 }
+
+/* 分页组件 */
+.pagination {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 分页容器 - 允许换行 */
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;  /* 允许换行 */
+    justify-content: center;  /* 居中 */
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 5px;
+}
+
+.pagination-btn {
+    min-width: 40px;
+    height: 40px;
+    padding: 8px 12px;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(.disabled) {
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(102, 126, 234, 0.2);
+}
+
+.pagination-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+.pagination-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* 导航按钮 - 更小的字体 */
+.pagination-btn-nav {
+    font-size: 0.75em;
+    padding: 8px 10px;
+    white-space: nowrap;  /* 不换行 */
+}
+
+/* 响应式 - 移动端 */
+@media (max-width: 600px) {
+    .pagination-wrapper {
+        gap: 5px;
+    }
+    
+    .pagination-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 5px 8px;
+        font-size: 0.8em;
+    }
+    
+    .pagination-btn-nav {
+        font-size: 0.65em;
+        padding: 5px 8px;
+    }
+}
+

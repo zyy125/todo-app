@@ -20,3 +20,9 @@ const STATUS_CODE = {
     NOT_FOUND: 404,
     SERVER_ERROR: 500
 };
+
+// 分页配置
+const PAGINATION = {
+    PAGE_SIZE: 6,        // 每页显示数量
+    MAX_PAGES: 5          // 最多显示的页码按钮数量
+};

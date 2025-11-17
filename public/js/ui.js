@@ -141,5 +141,102 @@ const TodoUI = {
      */
     showConfirm(message) {
         return confirm(message);
+    },
+
+    // ... 保留原有代码 ...
+
+    /**
+     * 渲染分页组件
+     * @param {number} currentPage - 当前页码
+     * @param {number} totalPages - 总页数
+     */
+    renderPagination(currentPage, totalPages) {
+        const paginationContainer = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let html = '<div class="pagination-wrapper">';
+        
+        // 上一页按钮
+        html += `
+            <button 
+                class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                onclick="TodoApp.goToPage(${currentPage - 1})"
+                ${currentPage === 1 ? 'disabled' : ''}
+            >
+                 上一页
+            </button>
+        `;
+
+        // 页码按钮
+        html += '<div class="pagination-numbers">';
+        
+        const maxPages = PAGINATION.MAX_PAGES;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+        let endPage = Math.min(totalPages, startPage + maxPages - 1);
+        
+        if (endPage - startPage < maxPages - 1) {
+            startPage = Math.max(1, endPage - maxPages + 1);
+        }
+
+        // 第一页
+        if (startPage > 1) {
+            html += `
+                <button class="pagination-btn" onclick="TodoApp.goToPage(1)">1</button>
+                ${startPage > 2 ? '<span class="pagination-ellipsis">...</span>' : ''}
+            `;
+        }
+
+        // 中间页码
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button 
+                    class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                    onclick="TodoApp.goToPage(${i})"
+                >
+                    ${i}
+                </button>
+            `;
+        }
+
+        // 最后一页
+        if (endPage < totalPages) {
+            html += `
+                ${endPage < totalPages - 1 ? '<span class="pagination-ellipsis">...</span>' : ''}
+                <button class="pagination-btn" onclick="TodoApp.goToPage(${totalPages})">${totalPages}</button>
+            `;
+        }
+
+        html += '</div>';
+
+        // 下一页按钮
+        html += `
+            <button 
+                class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                onclick="TodoApp.goToPage(${currentPage + 1})"
+                ${currentPage === totalPages ? 'disabled' : ''}
+            >
+                下一页 
+            </button>
+        `;
+
+        html += '</div>';
+
+        // 分页信息
+        html += `
+            <div class="pagination-info">
+                第 ${currentPage} / ${totalPages} 页
+            </div>
+        `;
+
+        paginationContainer.innerHTML = html;
     }
 };
+
+
+
+
+

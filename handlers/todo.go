@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"todo-app/config"
@@ -12,6 +13,8 @@ import (
 // GetTodos 获取待办事项列表
 func GetTodos(c *gin.Context) {
 	status := c.DefaultQuery("status", "all")
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("pageSize", "6")
 
 	// 验证 status 参数
 	if status != "all" && status != "completed" && status != "pending" {
@@ -20,6 +23,16 @@ func GetTodos(c *gin.Context) {
 			"message": "invalid status",
 		})
 		return
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if page < 1 || err != nil {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 || pageSize > 100 {
+		pageSize = 8
 	}
 
 	// 构建查询
@@ -31,6 +44,18 @@ func GetTodos(c *gin.Context) {
 	} else {
 		query = "SELECT id, title, completed FROM todos WHERE completed = 0"
 	}
+
+	var totalSize int
+	countQuery := strings.Replace(query, "SELECT id, title, completed", "SELECT COUNT(*)", 1) 
+	err = config.DB.QueryRow(countQuery).Scan(&totalSize)
+
+	totalPages := (totalSize + pageSize - 1) / pageSize
+	if totalPages < 1 {
+		totalPages = 1
+	}
+
+	offset := (page - 1) * pageSize
+	query += fmt.Sprintf(" ORDER BY id DESC LIMIT %d OFFSET %d", pageSize, offset)
 
 	// 执行查询
 	rows, err := config.DB.Query(query)
@@ -69,6 +94,9 @@ func GetTodos(c *gin.Context) {
 		Total:     len(filteredTodos),
 		Completed: completedNum,
 		Pending:   pendingNum,
+		Page: page,
+		PageSize: pageSize,
+		Totalpages: totalPages,
 	}
 
 	c.JSON(200, gin.H{

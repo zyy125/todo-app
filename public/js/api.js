@@ -7,11 +7,15 @@ const TodoAPI = {
     /**
      * 获取待办事项列表
      * @param {string} status - 筛选条件 (all/pending/completed)
+     * @param {number} page - 页码
+     * @param {number} pageSize - 每页数量
      * @returns {Promise<Object>} 返回数据
      */
-    async getTodos(status = 'all') {
-        try {
-            const response = await fetch(`${API_BASE}/todos?status=${status}`);
+    async getTodos(status = 'all', page = 1, pageSize = PAGINATION.PAGE_SIZE) {
+               try {
+            const response = await fetch(
+                `${API_BASE}/todos?status=${status}&page=${page}&pageSize=${pageSize}`
+            );
             const result = await response.json();
             return result;
         } catch (error) {

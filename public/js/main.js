@@ -6,6 +6,9 @@
 const TodoApp = {
     // 当前筛选条件
     currentFilter: 'all',
+    
+    // 当前页码（新增）
+    currentPage: 1,
 
     /**
      * 初始化应用
@@ -36,11 +39,16 @@ const TodoApp = {
         try {
             TodoUI.showLoading();
 
-            const result = await TodoAPI.getTodos(this.currentFilter);
+            const result = await TodoAPI.getTodos(
+                this.currentFilter, 
+                this.currentPage, 
+                PAGINATION.PAGE_SIZE
+            );
 
             if (result.code === STATUS_CODE.SUCCESS) {
                 TodoUI.updateStats(result.data);
                 TodoUI.renderTodos(result.data.todos);
+                TodoUI.renderPagination(result.data.page, result.data.totalPages);
             } else {
                 TodoUI.showError('加载失败：' + result.message);
             }
@@ -66,6 +74,7 @@ const TodoApp = {
 
             if (result.code === STATUS_CODE.SUCCESS) {
                 TodoUI.clearInput();
+                this.currentPage = 1; // 重置到第一页
                 this.loadTodos();
             } else {
                 TodoUI.showAlert('添加失败：' + result.message);
@@ -122,8 +131,22 @@ const TodoApp = {
      */
     filterTodos(filter) {
         this.currentFilter = filter;
+        this.currentPage = 1; // 重置到第一页
         TodoUI.updateFilterButtons(filter);
         this.loadTodos();
+    },
+
+    /**
+     * 跳转到指定页（新增）
+     * @param {number} page - 页码
+     */
+    goToPage(page) {
+        if (page < 1) return;
+        this.currentPage = page;
+        this.loadTodos();
+        
+        // 滚动到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
 

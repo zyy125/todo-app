@@ -17,6 +17,10 @@ type UpdateTodoRequest struct {
 	Completed *bool `json:"completed"`
 }
 
+type UpdateTodoTitle struct {
+	Title string `json:"title" binding:"required"`
+}
+
 // TodoListResponse 待办事项列表响应
 type TodoListResponse struct {
 	Todos     []Todo `json:"todos"`

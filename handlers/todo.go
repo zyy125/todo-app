@@ -287,3 +287,89 @@ func DeleteTodo(c *gin.Context) {
 		"message": "delete successfully",
 	})
 }
+
+func UpdateTodoRequestTitle(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"code": 400,
+			"message": "id format error",
+		})
+		return
+	}
+
+	var request models.UpdateTodoTitle
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(400, gin.H{
+			"code": 400,
+			"message": "request format error: " + err.Error(),
+		})
+		return	
+	}
+
+	trimmed := strings.TrimSpace(request.Title)
+	if trimmed == "" {
+		c.JSON(400, gin.H{
+			"code":    400,
+			"message": "title cannot be empty",
+		})
+		return
+	}
+
+	if len(request.Title) > 200 {
+		c.JSON(400, gin.H {
+			"code": 400, 
+			"message": "title too long(max is 200 characters)",
+		})
+		return
+	}
+
+	var exists int
+
+	err = config.DB.QueryRow("SELECT COUNT(*) FROM todos WHERE id = ?", id).Scan(&exists)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"code": 500,
+			"message": "database query error" + err.Error(),
+		})
+		return
+	}
+
+	if exists == 0 {
+		c.JSON(404, gin.H{
+			"code": 404,
+			"message": "todo not found",
+		})
+		return
+	}
+
+	_,err = config.DB.Exec("UPDATE todos SET title = ? WHERE id = ?", request.Title, id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"code":    500,
+			"message": "database update error: " + err.Error(),
+		})
+		return
+	}
+
+	var updated models.Todo
+
+	err = config.DB.QueryRow("SELECT id, title, completed FROM todos WHERE id = ?", id).
+	Scan(&updated.ID, &updated.Title, &updated.Completed)
+
+	if err != nil {
+		c.JSON(500, gin.H{
+			"code":    500,
+			"message": "failed to query updated todo: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "title updated successfully",
+		"data":    updated,
+	})
+}	

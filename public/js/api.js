@@ -69,6 +69,26 @@ const TodoAPI = {
         }
     },
 
+    async updateTodoTitle(id, title) {
+        try {
+        
+        const response = await fetch(`${API_BASE}/todos/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ title: title })  // 明确写 title: title
+        });
+        
+        const result = await response.json();
+        
+        return result;
+    } catch (error) {
+        console.error('更新待办事项标题失败:', error);
+        throw error;
+    }
+    },
+
     /**
      * 删除待办事项
      * @param {number} id - 待办事项 ID

@@ -189,6 +189,28 @@ body {
 .todo-text {
     flex: 1;
     font-size: 1em;
+    
+    /* 文字截断样式（新增） */
+    overflow: hidden;              /* 隐藏溢出内容 */
+    text-overflow: ellipsis;       /* 显示省略号 */
+    white-space: nowrap;           /* 不换行 */
+    cursor: pointer;               /* 鼠标指针变成手型 */
+    max-width: 100%;               /* 限制最大宽度 */
+    
+    /* 悬停提示（新增） */
+    transition: color 0.3s;
+}
+
+/* 悬停效果 */
+.todo-text:hover {
+    color: #667eea;                /* 鼠标悬停变色 */
+}
+
+/* 已完成的待办事项文字（修改） */
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #999;
+    cursor: pointer;               /* 保持可点击 */
 }
 
 .btn-delete {
@@ -330,3 +352,486 @@ body {
     }
 }
 
+/* ========== 详情弹窗样式 ========== */
+
+/* 遮罩层 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);        /* 半透明黑色 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;                          /* 确保在最上层 */
+    animation: fadeIn 0.3s ease;            /* 淡入动画 */
+}
+
+/* 弹窗容器 */
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;                       /* 内容过多时可滚动 */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;           /* 滑入动画 */
+    position: relative;
+}
+
+/* 关闭按钮 */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.modal-close:hover {
+    background: #e0e0e0;
+    color: #333;
+    transform: rotate(90deg);               /* 旋转动画 */
+}
+
+/* 弹窗标题 */
+.modal-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    padding-right: 30px;                    /* 为关闭按钮留空间 */
+}
+
+/* 弹窗内容 */
+.modal-body {
+    font-size: 1em;
+    color: #666;
+    line-height: 1.6;
+    word-wrap: break-word;                  /* 长单词自动换行 */
+    word-break: break-all;                  /* 中文英文都能正确断行 */
+}
+
+/* 弹窗底部按钮区 */
+.modal-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s;
+}
+
+.modal-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.modal-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 滑入动画 */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+    .modal-content {
+        padding: 20px;
+        max-width: 95%;
+    }
+    
+    .modal-title {
+        font-size: 1.1em;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+
+/* ========== 详情弹窗优化 ========== */
+
+/* 详情区块 */
+.detail-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.detail-content {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 1em;
+    line-height: 1.6;
+    color: #333;
+    word-wrap: break-word;
+}
+
+/* 状态徽章 */
+.status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.status-completed {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: white;
+}
+
+/* ========== 编辑模式优化 ========== */
+
+.edit-mode {
+    animation: slideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.edit-section {
+    margin-bottom: 20px;
+}
+
+.edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.edit-label {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #555;
+}
+
+/* 字符计数器 */
+.char-counter {
+    font-size: 0.85em;
+    color: #999;
+    font-weight: normal;
+}
+
+/* 编辑输入框优化 */
+.edit-todo-input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.3s ease;
+    background: white;
+    line-height: 1.6;
+}
+
+.edit-todo-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    background: #fafbff;
+}
+
+.edit-todo-input:hover {
+    border-color: #ccc;
+}
+
+/* 输入框错误状态 */
+.edit-todo-input.input-error {
+    border-color: #f56565;
+    background: #fff5f5;
+}
+
+.edit-todo-input.input-error:focus {
+    box-shadow: 0 0 0 4px rgba(245, 101, 101, 0.1);
+}
+
+/* 输入提示 */
+.input-hint {
+    margin-top: 8px;
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+}
+
+/* 错误提示优化 */
+.edit-error {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    border-left: 4px solid #f56565;
+    color: #c53030;
+    border-radius: 6px;
+    font-size: 0.9em;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* ========== 按钮优化 ========== */
+
+.modal-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.modal-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.modal-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.modal-btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.modal-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 加载状态 */
+.btn-loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.modal-btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.modal-btn-secondary:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+/* ========== 分页按钮优化 ========== */
+
+/* 导航按钮 */
+.pagination-btn-nav {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+}
+
+.nav-arrow {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.nav-text {
+    font-size: 0.85em;
+}
+
+/* 响应式 - 小屏幕隐藏文字 */
+@media (max-width: 768px) {
+    .nav-text {
+        display: none;
+    }
+    
+    .pagination-btn-nav {
+        padding: 8px;
+        min-width: 40px;
+    }
+}
+/* ========== Toast 横幅（低调版本）========== */
+
+.toast-banner {
+    position: fixed;
+    top: 20px;  /* 不贴顶，留一点距离 */
+    left: 50%;
+    transform: translate(-50%, -120%);  /* 居中 */
+    max-width: 400px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.95);  /* 半透明白色 */
+    border: 1px solid #e2e8f0;  /* 浅灰边框 */
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 400;  /* 正常字重，不加粗 */
+    color: #4a5568;  /* 深灰色文字 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);  /* 轻微阴影 */
+    z-index: 3000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.3s ease;
+    backdrop-filter: blur(8px);  /* 毛玻璃效果 */
+}
+
+.toast-banner.show {
+    transform: translate(-50%, 0);
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast-icon {
+    font-size: 1.1em;
+    opacity: 0.8;  /* 图标半透明 */
+}
+
+.toast-text {
+    font-size: 0.9em;
+    color: #4a5568;
+}
+
+.toast-close {
+    border: none;
+    background: transparent;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 1.2em;
+    color: #a0aec0;  /* 浅灰色 */
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+}
+
+.toast-close:hover {
+    background: #f7fafc;
+    opacity: 1;
+}
+
+/* 成功提示（极简绿） */
+.toast-banner.toast-success {
+    border-left: 3px solid #48bb78;  /* 只有左边框是绿色 */
+}
+
+.toast-banner.toast-success .toast-icon {
+    color: #48bb78;
+    opacity: 0.7;
+}
+
+/* 错误提示（极简红） */
+.toast-banner.toast-error {
+    border-left: 3px solid #f56565;
+}
+
+.toast-banner.toast-error .toast-icon {
+    color: #f56565;
+    opacity: 0.7;
+}
+
+/* 信息提示（极简蓝） */
+.toast-banner.toast-info {
+    border-left: 3px solid #4299e1;
+}
+
+.toast-banner.toast-info .toast-icon {
+    color: #4299e1;
+    opacity: 0.7;
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+    .toast-banner {
+        top: 10px;
+        max-width: calc(100% - 40px);
+        padding: 10px 16px;
+        font-size: 0.85em;
+    }
+    
+    .toast-close {
+        width: 20px;
+        height: 20px;
+        font-size: 1em;
+    }
+}

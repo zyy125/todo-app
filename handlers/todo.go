@@ -91,7 +91,7 @@ func GetTodos(c *gin.Context) {
 	// 构建响应
 	response := models.TodoListResponse{
 		Todos:     filteredTodos,
-		Total:     len(filteredTodos),
+		Total:     completedNum + pendingNum,
 		Completed: completedNum,
 		Pending:   pendingNum,
 		Page: page,
@@ -124,6 +124,26 @@ func CreateTodo(c *gin.Context) {
 			"message": "title is empty",
 		})
 		return
+	}
+
+	force := c.DefaultQuery("force", "false")
+
+	if force == "false" {
+		var existingTitle string 
+		err := config.DB.QueryRow("SELECT title FROM todos WHERE LOWER(title) = LOWER(?) LIMIT 1", trimmed).
+		Scan(&existingTitle)
+
+		if err == nil {
+			// 找到重复项，返回特殊状态码
+			c.JSON(200, gin.H{
+				"code":    409,  // 409 Conflict
+				"message": "duplicate todo found",
+				"data": gin.H{
+					"existing": existingTitle,
+				},
+			})
+			return
+		}
 	}
 
 	// 插入数据库

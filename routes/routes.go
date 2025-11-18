@@ -17,13 +17,4 @@ func SetupRoutes(r *gin.Engine) {
 		api.PATCH("/todos/:id", handlers.UpdateTodoRequestTitle)
 		api.DELETE("/todos/:id", handlers.DeleteTodo)
 	}
-
-	// 静态文件服务（新增）
-	r.Static("/css", "./public/css")
-	r.Static("/js", "./public/js")
-	
-	// 首页
-	r.GET("/", func(c *gin.Context) {
-		c.File("./public/index.html")
-	})
 }

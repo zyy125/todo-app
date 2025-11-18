@@ -1,1 +1,0 @@
-GET /api/todos?status=all&page=1&pageSize=10

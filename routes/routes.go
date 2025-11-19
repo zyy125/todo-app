@@ -2,6 +2,7 @@ package routes
 
 import (
 	"todo-app/handlers"
+	"todo-app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,10 +12,20 @@ func SetupRoutes(r *gin.Engine) {
 	// API 路由
 	api := r.Group("/api")
 	{
-		api.GET("/todos", handlers.GetTodos)
-		api.POST("/todos", handlers.CreateTodo)
-		api.PUT("/todos/:id", handlers.UpdateTodo)
-		api.PATCH("/todos/:id", handlers.UpdateTodoRequestTitle)
-		api.DELETE("/todos/:id", handlers.DeleteTodo)
+		todos := api.Group("/todos") 
+		todos.Use(middleware.AuthMiddleware())
+		{
+			todos.GET("", handlers.GetTodos)
+			todos.POST("", handlers.CreateTodo)
+			todos.PUT("/:id", handlers.UpdateTodo)
+			todos.PATCH("/:id", handlers.UpdateTodoRequestTitle)
+			todos.DELETE("/:id", handlers.DeleteTodo)
+		}
+
+		auth := api.Group("/auth")
+		{
+			auth.POST("/register", handlers.Register)
+			auth.POST("/login", handlers.Login)
+		}
 	}
 }

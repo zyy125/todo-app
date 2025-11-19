@@ -15,6 +15,7 @@ func GetTodos(c *gin.Context) {
 	status := c.DefaultQuery("status", "all")
 	pageStr := c.DefaultQuery("page", "1")
 	pageSizeStr := c.DefaultQuery("pageSize", "6")
+	userID, _ := c.Get("user_id")
 
 	// 验证 status 参数
 	if status != "all" && status != "completed" && status != "pending" {
@@ -38,16 +39,16 @@ func GetTodos(c *gin.Context) {
 	// 构建查询
 	var query string
 	if status == "all" {
-		query = "SELECT id, title, completed FROM todos"
+		query = "SELECT id, title, completed FROM todos WHERE user_id = ?"
 	} else if status == "completed" {
-		query = "SELECT id, title, completed FROM todos WHERE completed = 1"
+		query = "SELECT id, title, completed FROM todos WHERE completed = 1 AND user_id = ?"
 	} else {
-		query = "SELECT id, title, completed FROM todos WHERE completed = 0"
+		query = "SELECT id, title, completed FROM todos WHERE completed = 0 AND user_id = ?"
 	}
 
 	var totalSize int
 	countQuery := strings.Replace(query, "SELECT id, title, completed", "SELECT COUNT(*)", 1) 
-	err = config.DB.QueryRow(countQuery).Scan(&totalSize)
+	err = config.DB.QueryRow(countQuery,userID).Scan(&totalSize)
 
 	totalPages := (totalSize + pageSize - 1) / pageSize
 	if totalPages < 1 {
@@ -58,7 +59,7 @@ func GetTodos(c *gin.Context) {
 	query += fmt.Sprintf(" ORDER BY id DESC LIMIT %d OFFSET %d", pageSize, offset)
 
 	// 执行查询
-	rows, err := config.DB.Query(query)
+	rows, err := config.DB.Query(query,userID)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code":    500,
@@ -85,8 +86,8 @@ func GetTodos(c *gin.Context) {
 
 	// 统计信息
 	var completedNum, pendingNum int
-	config.DB.QueryRow("SELECT COUNT(*) FROM todos WHERE completed = 1").Scan(&completedNum)
-	config.DB.QueryRow("SELECT COUNT(*) FROM todos WHERE completed = 0").Scan(&pendingNum)
+	config.DB.QueryRow("SELECT COUNT(*) FROM todos WHERE completed = 1 AND user_id = ?", userID).Scan(&completedNum)
+	config.DB.QueryRow("SELECT COUNT(*) FROM todos WHERE completed = 0 AND user_id = ?", userID).Scan(&pendingNum)
 
 	// 构建响应
 	response := models.TodoListResponse{
@@ -125,12 +126,13 @@ func CreateTodo(c *gin.Context) {
 		})
 		return
 	}
+	userID, _ := c.Get("user_id")
 
 	force := c.DefaultQuery("force", "false")
 
 	if force == "false" {
 		var existingTitle string 
-		err := config.DB.QueryRow("SELECT title FROM todos WHERE LOWER(title) = LOWER(?) LIMIT 1", trimmed).
+		err := config.DB.QueryRow("SELECT title FROM todos WHERE LOWER(title) = LOWER(?) AND user_id = ? LIMIT 1", trimmed, userID).
 		Scan(&existingTitle)
 
 		if err == nil {
@@ -147,8 +149,8 @@ func CreateTodo(c *gin.Context) {
 	}
 
 	// 插入数据库
-	result, err := config.DB.Exec("INSERT INTO todos (title, completed) VALUES (?, ?)",
-		request.Title, false)
+	result, err := config.DB.Exec("INSERT INTO todos (title, completed, user_id) VALUES (?, ?, ?)",
+		request.Title, false, userID)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code":    500,
@@ -193,6 +195,7 @@ func UpdateTodo(c *gin.Context) {
 		})
 		return
 	}
+	userID, _ := c.Get("user_id")
 
 	// 解析请求体
 	var request models.UpdateTodoRequest
@@ -214,8 +217,8 @@ func UpdateTodo(c *gin.Context) {
 	}
 
 	// 执行更新
-	result, err := config.DB.Exec("UPDATE todos SET completed = ? WHERE id = ?",
-		*request.Completed, id)
+	result, err := config.DB.Exec("UPDATE todos SET completed = ? WHERE id = ? AND user_id = ?",
+		*request.Completed, id, userID)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code":    500,
@@ -244,7 +247,7 @@ func UpdateTodo(c *gin.Context) {
 
 	// 查询更新后的数据
 	var updatedTodo models.Todo
-	err = config.DB.QueryRow("SELECT id, title, completed FROM todos WHERE id = ?", id).
+	err = config.DB.QueryRow("SELECT id, title, completed FROM todos WHERE id = ? AND user_id = ?", id, userID).
 		Scan(&updatedTodo.ID, &updatedTodo.Title, &updatedTodo.Completed)
 	if err != nil {
 		c.JSON(500, gin.H{
@@ -266,6 +269,7 @@ func DeleteTodo(c *gin.Context) {
 	// 解析 ID
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
+	userID, _ := c.Get("user_id")
 	if err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
@@ -275,7 +279,7 @@ func DeleteTodo(c *gin.Context) {
 	}
 
 	// 执行删除
-	result, err := config.DB.Exec("DELETE FROM todos WHERE id = ?", id)
+	result, err := config.DB.Exec("DELETE FROM todos WHERE id = ? AND user_id = ?", id, userID)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code":    500,
@@ -311,6 +315,7 @@ func DeleteTodo(c *gin.Context) {
 func UpdateTodoRequestTitle(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
+	userID, _ := c.Get("user_id")
 	if err != nil {
 		c.JSON(400, gin.H{
 			"code": 400,
@@ -348,7 +353,7 @@ func UpdateTodoRequestTitle(c *gin.Context) {
 
 	var exists int
 
-	err = config.DB.QueryRow("SELECT COUNT(*) FROM todos WHERE id = ?", id).Scan(&exists)
+	err = config.DB.QueryRow("SELECT COUNT(*) FROM todos WHERE id = ? AND user_id = ?", id, userID).Scan(&exists)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code": 500,
@@ -365,7 +370,7 @@ func UpdateTodoRequestTitle(c *gin.Context) {
 		return
 	}
 
-	_,err = config.DB.Exec("UPDATE todos SET title = ? WHERE id = ?", request.Title, id)
+	_,err = config.DB.Exec("UPDATE todos SET title = ? WHERE id = ? AND user_id = ?", request.Title, id, userID)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code":    500,
@@ -376,7 +381,7 @@ func UpdateTodoRequestTitle(c *gin.Context) {
 
 	var updated models.Todo
 
-	err = config.DB.QueryRow("SELECT id, title, completed FROM todos WHERE id = ?", id).
+	err = config.DB.QueryRow("SELECT id, title, completed FROM todos WHERE id = ? AND user_id = ?", id, userID).
 	Scan(&updated.ID, &updated.Title, &updated.Completed)
 
 	if err != nil {
